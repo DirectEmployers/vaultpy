@@ -1,8 +1,0 @@
-README.md
-pyproject.toml
-setup.cfg
-vault/__init__.py
-vaultpy.egg-info/PKG-INFO
-vaultpy.egg-info/SOURCES.txt
-vaultpy.egg-info/dependency_links.txt
-vaultpy.egg-info/top_level.txt
