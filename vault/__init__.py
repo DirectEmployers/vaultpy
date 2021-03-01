@@ -83,15 +83,20 @@ class VaultSecretsWrapper:
         """
         Report secret usage to Datadog for evaluation and cleanup of old secrets.
         """
-        statsd.increment(
-            "vault.secrets.usage",
-            value=value,
-            tags=[
-                f"env:{self._env}",
-                f"service:{self._service}",
-                f"secret_key:{key}",
-            ],
-        )
+        try:
+            statsd.increment(
+                "vault.secrets.usage",
+                value=value,
+                tags=[
+                    f"env:{self._env}",
+                    f"service:{self._service}",
+                    f"secret_key:{key}",
+                ],
+            )
+        except Exception:
+            if not hasattr(self, "_no_datadog"):
+                logger.error("Vault secret usage could not be reported to Datadog!")
+                self._no_datadog = True
 
     def __getattribute__(self, key: str):
         """
