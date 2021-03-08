@@ -15,7 +15,7 @@ def _is_base64(s):
     Checks whether a sting has been base 64 encoded.
     """
     try:
-        return b64encode(b64decode(s)) == s
+        return b64encode(b64decode(s)) == bytes(s, "utf-8")
     except Exception:
         return False
 
@@ -35,7 +35,7 @@ def _load_vault_secrets() -> Dict:
     should not be called anywhere except within this module!
     """
     with open(environ["VAULT_SECRETS_PATH"]) as file:
-        contents = file.read()
+        contents = file.read().strip()
 
     if _is_base64(contents):
         contents = b64decode(contents)
