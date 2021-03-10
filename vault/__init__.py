@@ -42,10 +42,14 @@ def _load_vault_secrets() -> Dict:
 
     contents = loads(contents)
 
-    if contents.get("data"):
-        # If the injected secret is formatted as a Vault Secret struct, the actual
-        # secrets will be under a `data` key.
+    try:
+        # If the injected secret is formatted as a Vault Secret struct,
+        # the actual secrets will be under a `data` key.
         contents = contents["data"]
+        # Secrets could be under yet another `data` key. We'll try once more.
+        contents = contents["data"]
+    except KeyError:
+        pass
 
     return contents
 
