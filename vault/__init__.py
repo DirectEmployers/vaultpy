@@ -41,15 +41,12 @@ def _load_vault_secrets() -> Dict:
         contents = b64decode(contents)
 
     contents = loads(contents)
-    print(contents.keys())
+
     try:
         # If the injected secret is formatted as a Vault Secret struct,
-        # the actual secrets will be under a `data` key.
+        # the actual secrets will be nested under two `data` keys.
         contents = contents["data"]
-        print(contents.keys())
-        # Secrets could be under yet another `data` key. We'll try once more.
         contents = contents["data"]
-        print(contents.keys())
     except KeyError:
         pass
 
