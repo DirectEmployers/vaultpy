@@ -2,10 +2,11 @@ import logging
 from base64 import b64decode, b64encode
 from importlib import import_module
 from json import loads
-from os import environ
 from typing import Dict
 
 from datadog import statsd
+
+import config
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ def _load_vault_secrets() -> Dict:
     base 64 decode followed by JSON decode on file contents. This function
     should not be called anywhere except within this module!
     """
-    with open(environ["VAULT_SECRETS_PATH"]) as file:
+    with open(config.SECRETS_PATH) as file:
         contents = file.read().strip()
 
     if _is_base64(contents):
@@ -59,7 +60,7 @@ def _get_secrets() -> Dict:
     located at path in VAULT_SECRETS_PATH. Performs base 64 decode followed by JSON
     decode on file contents.
     """
-    if not environ.get("USE_VAULT"):
+    if not config.ENABLE_VAULT:
         # Use dev secrets when available.
         return _load_de_secrets()
 
@@ -73,8 +74,6 @@ class VaultSecretsWrapper:
 
     def __init__(self, secrets: Dict):
         self._keys = secrets.keys()
-        self._env = environ.get("DD_ENV")
-        self._service = environ.get("DD_SERVICE")
 
         for key, value in secrets.items():
             # Set baseline usage of 0 for all secrets.
@@ -86,20 +85,16 @@ class VaultSecretsWrapper:
         """
         Report secret usage to Datadog for evaluation and cleanup of old secrets.
         """
-        try:
-            statsd.increment(
-                "vault.secrets.usage",
-                value=value,
-                tags=[
-                    f"env:{self._env}",
-                    f"service:{self._service}",
-                    f"secret_key:{key}",
-                ],
-            )
-        except Exception:
-            if not hasattr(self, "_no_datadog"):
+        if config.ENABLE_DATADOG:
+            try:
+                statsd.increment(
+                    "vault.secrets.usage",
+                    value=value,
+                    tags=[f"secret_key:{key}"],
+                )
+            except Exception:
                 logger.error("Vault secret usage could not be reported to Datadog!")
-                self._no_datadog = True
+                config.ENABLE_DATADOG = False
 
     def __getattribute__(self, key: str):
         """
