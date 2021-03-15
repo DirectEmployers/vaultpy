@@ -6,7 +6,7 @@ from typing import Dict
 
 from datadog import statsd
 
-import config
+from . import config
 
 logger = logging.getLogger(__name__)
 
