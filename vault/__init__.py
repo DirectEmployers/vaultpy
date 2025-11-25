@@ -31,7 +31,7 @@ def _load_de_secrets() -> Dict:
 
 def _load_vault_secrets() -> Dict:
     """
-    Load Vault injected secrets file located at VAULT_SECRETS_PATH, then perform
+    Load Vault injected secrets file located at VAULTPY_SECRETS_PATH, then perform
     base 64 decode followed by JSON decode on file contents. This function
     should not be called anywhere except within this module!
     """
@@ -64,7 +64,7 @@ def _parse_json_secrets(json_contents: str) -> Dict:
 def _get_secrets() -> Dict:
     """
     Get secrets from de_secrets.py in local dev, or from Vault injected secrets file
-    located at path in VAULT_SECRETS_PATH. Performs base 64 decode followed by JSON
+    located at path in VAULTPY_SECRETS_PATH. Performs base 64 decode followed by JSON
     decode on file contents.
 
     This is passed to VaultSecretsWrapper as a callable to delay loading of files
